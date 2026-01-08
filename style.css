@@ -1,0 +1,234 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a0a2e 0%, #0f051d 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(255, 107, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b00 0%, #ff0080 50%, #a020f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .github-link {
+            display: inline-block;
+            color: #a020f0;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .github-link:hover {
+            opacity: 1;
+            color: #ff6b00;
+        }
+
+        .container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(255, 107, 0, 0.3);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: rgba(255, 107, 0, 0.02);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #ff6b00;
+            background: rgba(255, 107, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .drop-text {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-subtext {
+            font-size: 0.9rem;
+            color: #707070;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.9rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff0080 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 107, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(160, 32, 240, 0.2);
+            color: #a020f0;
+            border: 1px solid rgba(160, 32, 240, 0.4);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(160, 32, 240, 0.3);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .canvas-container {
+            background: #000;
+            border-radius: 16px;
+            padding: 2rem 2rem 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(255, 107, 0, 0.2);
+            border: 1px solid rgba(255, 107, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .channel-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spectrogram-wrapper {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .spectrogram-wrapper:last-of-type {
+            margin-bottom: 0;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            padding: 0 0.5rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: monospace;
+        }
+
+        .file-info {
+            background: rgba(255, 107, 0, 0.05);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #ff6b00;
+            margin-bottom: 0.3rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #a020f0;
+            font-size: 1.1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .drop-zone {
+                padding: 2rem 1rem;
+            }
+
+            button {
+                padding: 0.8rem 1.4rem;
+                font-size: 0.9rem;
+            }
+
+            .canvas-container {
+                padding: 1rem;
+            }
+        }
+
+        input[type="file"] {
+            display: none;
+        }

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SpectroGram - Analyze audio files and generate spectrograms visually">
+    <meta name="theme-color" content="#ff6b00">
+    <link rel="canonical" href="https://drbaph.is-a.dev/SpectroGram">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://drbaph.is-a.dev/SpectroGram">
+    <meta property="og:title" content="SpectroGram">
+    <meta property="og:description" content="Analyze audio files and generate spectrograms visually">
+    <meta property="og:image" content="https://drbaph.is-a.dev/SpectroGram/og.jpg">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://drbaph.is-a.dev/SpectroGram">
+    <meta name="twitter:title" content="SpectroGram">
+    <meta name="twitter:description" content="Analyze audio files and generate spectrograms visually">
+    <meta name="twitter:image" content="https://drbaph.is-a.dev/SpectroGram/og.jpg">
+
+    <title>SpectroGram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a0a2e 0%, #0f051d 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(255, 107, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b00 0%, #ff0080 50%, #a020f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .github-link {
+            display: inline-block;
+            color: #a020f0;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .github-link:hover {
+            opacity: 1;
+            color: #ff6b00;
+        }
+
+        .container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(255, 107, 0, 0.3);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: rgba(255, 107, 0, 0.02);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #ff6b00;
+            background: rgba(255, 107, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .drop-text {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-subtext {
+            font-size: 0.9rem;
+            color: #707070;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.9rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff0080 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 107, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(160, 32, 240, 0.2);
+            color: #a020f0;
+            border: 1px solid rgba(160, 32, 240, 0.4);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(160, 32, 240, 0.3);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .canvas-container {
+            background: #000;
+            border-radius: 16px;
+            padding: 2rem 2rem 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(255, 107, 0, 0.2);
+            border: 1px solid rgba(255, 107, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .channel-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spectrogram-wrapper {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .spectrogram-wrapper:last-of-type {
+            margin-bottom: 0;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            padding: 0 0.5rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: monospace;
+        }
+
+        .file-info {
+            background: rgba(255, 107, 0, 0.05);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #ff6b00;
+            margin-bottom: 0.3rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #a020f0;
+            font-size: 1.1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .drop-zone {
+                padding: 2rem 1rem;
+            }
+
+            button {
+                padding: 0.8rem 1.4rem;
+                font-size: 0.9rem;
+            }
+
+            .canvas-container {
+                padding: 1rem;
+            }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SpectroGram</h1>
+        <a href="https://github.com/Saganaki22/SpectroGram" target="_blank" class="github-link">
+            ⭐ View on GitHub
+        </a>
+    </div>
+
+    <div class="container">
+        <div id="dropZone" class="drop-zone">
+            <div class="drop-icon">🎵</div>
+            <div class="drop-text">Drag & Drop Audio File</div>
+            <div class="drop-subtext">or click to browse (MP3, WAV, OGG)</div>
+            <input type="file" id="fileInput" accept="audio/*">
+        </div>
+
+        <div id="fileInfo" class="file-info hidden">
+            <div class="file-name" id="fileName"></div>
+            <div id="fileDuration"></div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            Analyzing audio and generating spectrogram...
+        </div>
+
+        <div id="canvasContainer" class="canvas-container hidden"></div>
+
+        <div class="controls hidden" id="controlsContainer">
+            <button id="downloadBtn" class="btn-primary">Download Spectrogram</button>
+            <button id="removeBtn" class="btn-secondary">Remove Audio</button>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const removeBtn = document.getElementById('removeBtn');
+        const controlsContainer = document.getElementById('controlsContainer');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileNameDisplay = document.getElementById('fileName');
+        const fileDuration = document.getElementById('fileDuration');
+        const loading = document.getElementById('loading');
+
+        let audioContext;
+        let audioBuffer;
+
+        // Drag and drop handlers
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('audio/')) {
+                handleFile(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        async function handleFile(file) {
+            loading.classList.remove('hidden');
+            canvasContainer.classList.add('hidden');
+            fileInfo.classList.add('hidden');
+            controlsContainer.classList.add('hidden');
+
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const arrayBuffer = await file.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                const channels = audioBuffer.numberOfChannels;
+                const channelText = channels === 1 ? 'Mono' : channels === 2 ? 'Stereo' : `${channels} Channels`;
+                
+                fileNameDisplay.textContent = file.name;
+                fileDuration.textContent = `Duration: ${audioBuffer.duration.toFixed(2)}s | ${channelText} | Sample Rate: ${audioBuffer.sampleRate}Hz`;
+                fileInfo.classList.remove('hidden');
+
+                await generateSpectrograms();
+
+                loading.classList.add('hidden');
+                canvasContainer.classList.remove('hidden');
+                controlsContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error processing audio:', error);
+                alert('Error processing audio file: ' + error.message);
+                loading.classList.add('hidden');
+                resetUI();
+            }
+        }
+
+        async function generateSpectrograms() {
+            canvasContainer.innerHTML = '';
+            const numChannels = Math.min(audioBuffer.numberOfChannels, 2); // Support up to stereo
+            
+            const width = Math.min(window.innerWidth - 100, 1800);
+            const height = numChannels === 2 ? 350 : 600;
+
+            const currentFileName = fileNameDisplay.textContent;
+
+            for (let channel = 0; channel < numChannels; channel++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'spectrogram-wrapper';
+
+                const label = document.createElement('div');
+                label.className = 'channel-label';
+                label.textContent = numChannels === 2 ? (channel === 0 ? 'Left Channel' : 'Right Channel') : 'Mono';
+                wrapper.appendChild(label);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                wrapper.appendChild(canvas);
+
+                const timeLabels = document.createElement('div');
+                timeLabels.className = 'time-labels';
+                wrapper.appendChild(timeLabels);
+
+                canvasContainer.appendChild(wrapper);
+
+                // FIX: Pass isFirstChannel boolean correctly
+                await generateSpectrogramForChannel(canvas, timeLabels, channel, channel === 0, currentFileName);
+            }
+        }
+
+        async function generateSpectrogramForChannel(canvas, timeLabelsDiv, channelIndex, isFirstChannel, fileName) {
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Background
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+
+            const channelData = audioBuffer.getChannelData(channelIndex);
+            const sampleRate = audioBuffer.sampleRate;
+
+            // FIX: Pass isFirstChannel to the manual generation function
+            await generateSpectrogramManual(ctx, channelData, sampleRate, width, height, isFirstChannel, fileName);
+            drawTimeLabels(timeLabelsDiv, audioBuffer.duration);
+        }
+
+        // Fast Fourier Transform implementation (Radix-2 Cooley-Tukey)
+        // Replaces the slow naive DFT to ensure performance
+        function calculateFFT(buffer) {
+            const n = buffer.length;
+            if (n <= 1) return buffer.map(val => ({re: val, im: 0, mag: Math.abs(val)}));
+
+            const real = new Float32Array(buffer);
+            const imag = new Float32Array(n);
+            
+            // Bit-reversal permutation
+            let j = 0;
+            for (let i = 0; i < n - 1; i++) {
+                if (i < j) {
+                    [real[i], real[j]] = [real[j], real[i]];
+                    [imag[i], imag[j]] = [imag[j], imag[i]];
+                }
+                let k = n / 2;
+                while (k <= j) {
+                    j -= k;
+                    k /= 2;
+                }
+                j += k;
+            }
+
+            // Cooley-Tukey FFT
+            for (let len = 2; len <= n; len *= 2) {
+                const halfLen = len / 2;
+                const angle = -2 * Math.PI / len;
+                const wStepRe = Math.cos(angle);
+                const wStepIm = Math.sin(angle);
+
+                for (let i = 0; i < n; i += len) {
+                    let wRe = 1;
+                    let wIm = 0;
+                    for (let k = 0; k < halfLen; k++) {
+                        const uRe = real[i + k];
+                        const uIm = imag[i + k];
+                        const vRe = real[i + k + halfLen] * wRe - imag[i + k + halfLen] * wIm;
+                        const vIm = real[i + k + halfLen] * wIm + imag[i + k + halfLen] * wRe;
+
+                        real[i + k] = uRe + vRe;
+                        imag[i + k] = uIm + vIm;
+                        real[i + k + halfLen] = uRe - vRe;
+                        imag[i + k + halfLen] = uIm - vIm;
+
+                        let wReTemp = wRe * wStepRe - wIm * wStepIm;
+                        wIm = wRe * wStepIm + wIm * wStepRe;
+                        wRe = wReTemp;
+                    }
+                }
+            }
+
+            // Return magnitudes for the first half (symmetric spectrum)
+            const magnitudes = new Float32Array(n / 2);
+            for (let i = 0; i < n / 2; i++) {
+                magnitudes[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
+            }
+            return magnitudes;
+        }
+
+        async function generateSpectrogramManual(ctx, channelData, sampleRate, width, height, isFirstChannel, fileName) {
+            const fftSize = 2048;
+            const hopSize = Math.floor(fftSize / 4);
+            const numFrames = Math.floor((channelData.length - fftSize) / hopSize);
+            const freqBins = fftSize / 2;
+
+            const spectrogram = [];
+            let maxMagnitude = 0;
+
+            // Optimized Window Function (Hamming) + FFT
+            for (let i = 0; i < numFrames; i++) {
+                const offset = i * hopSize;
+                const frame = channelData.slice(offset, offset + fftSize);
+                
+                // Apply Hamming window
+                const windowed = new Float32Array(fftSize);
+                for (let n = 0; n < fftSize; n++) {
+                    windowed[n] = frame[n] * (0.54 - 0.46 * Math.cos(2 * Math.PI * n / fftSize));
+                }
+
+                // Use FFT instead of Naive DFT
+                const magnitudes = calculateFFT(windowed);
+                
+                spectrogram.push(magnitudes);
+                
+                // Track max magnitude for normalization
+                for(let k=0; k<freqBins; k++) {
+                    if(magnitudes[k] > maxMagnitude) maxMagnitude = magnitudes[k];
+                }
+
+                // Yield to browser every 50 frames to keep UI responsive
+                if (i % 50 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+            }
+
+            // Draw spectrogram - scale to fill width
+            const timeStep = width / numFrames;
+            const freqStep = height / freqBins;
+
+            for (let t = 0; t < numFrames; t++) {
+                const x = Math.floor(t * timeStep);
+                const xWidth = Math.ceil(timeStep) + 1;
+                
+                for (let f = 0; f < freqBins; f++) {
+                    const magnitude = spectrogram[t][f];
+                    // Avoid log(0)
+                    const normalized = magnitude / (maxMagnitude || 1);
+                    const db = 20 * Math.log10(normalized + 1e-10);
+                    const dbNormalized = Math.max(0, (db + 100) / 100); // Adjusted range
+
+                    const color = getSpectrogramColor(dbNormalized);
+                    ctx.fillStyle = color;
+                    ctx.fillRect(
+                        x,
+                        height - Math.floor((f + 1) * freqStep),
+                        xWidth,
+                        Math.ceil(freqStep) + 1
+                    );
+                }
+            }
+
+            // Draw frequency axis
+            drawFrequencyAxis(ctx, width, height, sampleRate);
+            
+            // FIX: Use isFirstChannel to decide whether to draw filename
+            if (isFirstChannel) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(fileName || 'Audio File', 10, 20);
+            }
+        }
+
+        function getSpectrogramColor(intensity) {
+            // Color scheme: black -> purple -> red -> orange -> yellow
+            if (intensity < 0.25) {
+                const t = intensity * 4;
+                const r = Math.floor(160 * t);
+                const g = Math.floor(32 * t);
+                const b = Math.floor(240 * t);
+                return `rgb(${r},${g},${b})`;
+            } else if (intensity < 0.5) {
+                const t = (intensity - 0.25) * 4;
+                const r = Math.floor(160 + 95 * t);
+                const g = Math.floor(32 - 32 * t);
+                const b = Math.floor(240 - 240 * t);
+                return `rgb(${r},${g},${b})`;
+            } else if (intensity < 0.75) {
+                const t = (intensity - 0.5) * 4;
+                const r = 255;
+                const g = Math.floor(107 * t);
+                const b = 0;
+                return `rgb(${r},${g},${b})`;
+            } else {
+                const t = (intensity - 0.75) * 4;
+                const r = 255;
+                const g = Math.floor(107 + 148 * t);
+                const b = 0;
+                return `rgb(${r},${g},${b})`;
+            }
+        }
+
+        function drawFrequencyAxis(ctx, width, height, sampleRate) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = '12px monospace';
+
+            const maxFreq = sampleRate / 2;
+            const numFreqLabels = 8;
+            for (let i = 0; i <= numFreqLabels; i++) {
+                const y = height - (i / numFreqLabels) * height;
+                const freq = (i / numFreqLabels) * maxFreq;
+                
+                // Format Hz nicely
+                let freqText = Math.round(freq);
+                if (freqText >= 1000) {
+                    freqText = (freqText / 1000).toFixed(1) + 'k';
+                }
+                
+                ctx.fillText(freqText + 'Hz', 5, y - 4);
+            }
+        }
+
+        function drawTimeLabels(timeLabelsDiv, duration) {
+            timeLabelsDiv.innerHTML = '';
+            const numTimeLabels = 10;
+            for (let i = 0; i <= numTimeLabels; i++) {
+                const time = (i / numTimeLabels) * duration;
+                const span = document.createElement('span');
+                span.textContent = time.toFixed(1) + 's';
+                timeLabelsDiv.appendChild(span);
+            }
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            const canvases = canvasContainer.querySelectorAll('canvas');
+            const totalHeight = Array.from(canvases).reduce((sum, c) => sum + c.height + 50, 0);
+            const maxWidth = Math.max(...Array.from(canvases).map(c => c.width));
+            
+            const composite = document.createElement('canvas');
+            composite.width = maxWidth;
+            composite.height = totalHeight;
+            const ctx = composite.getContext('2d');
+            
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, composite.width, composite.height);
+            
+            let yOffset = 0;
+            canvases.forEach((canvas) => {
+                ctx.drawImage(canvas, 0, yOffset);
+                yOffset += canvas.height + 50;
+            });
+
+            const link = document.createElement('a');
+            link.download = 'spectrogram.png';
+            link.href = composite.toDataURL();
+            link.click();
+        });
+
+        removeBtn.addEventListener('click', () => {
+            resetUI();
+        });
+
+        function resetUI() {
+            fileInput.value = '';
+            audioBuffer = null;
+            canvasContainer.innerHTML = '';
+            canvasContainer.classList.add('hidden');
+            fileInfo.classList.add('hidden');
+            controlsContainer.classList.add('hidden');
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
